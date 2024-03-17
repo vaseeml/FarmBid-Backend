@@ -19,8 +19,6 @@ userCtrl.register = async(req , res)=>{
         user.username = body.username.toLowerCase()
         if(noUser == 0){
             user.role = 'admin'
-            user.save()
-            res.status(201).json(user)
         }
         user.save()
         res.status(201).json(user)
