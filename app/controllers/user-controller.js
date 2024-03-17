@@ -20,7 +20,7 @@ userCtrl.register = async(req , res)=>{
         if(noUser == 0){
             user.role = 'admin'
         }
-        user.save()
+        await user.save()
         res.status(201).json(user)
     }catch(err){
         console.log(err)
