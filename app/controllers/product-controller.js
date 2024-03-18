@@ -7,8 +7,9 @@ productCtrl.create=async(req,res)=>{
         return res.status(400).json({errors:errors.array()})
     }
     try{
-        const body=req.body
+        const {body,file}=req
         const product=new Product(body)
+        product.productVideo=file.path
         await product.save()
         res.status(201).json(product)
     }catch(err){
