@@ -14,7 +14,7 @@ const multer = require('multer')
 configureDB()
 const storage=multer.diskStorage({
     destination:(req,file,cb)=>{
-        let uploadPath='./app/files/uploads/'
+        let uploadPath='./app/files/'
         if (file.mimetype.startsWith('video')) {
             uploadPath += 'videos/';
         }else {
