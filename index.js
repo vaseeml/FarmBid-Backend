@@ -27,11 +27,15 @@ const storage=multer.diskStorage({
     }
 })
 const upload=multer({storage:storage})
+
+//api requests
+
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
 app.post('/api/upload', upload.single('file'), (req, res) => {
     res.send('File uploaded successfully');
   });
+
 
 app.get('/api/vegetables' , authenticateUser , authorizeUser(['buyer']) , ()=>{
     console.log('all the vegetables')
