@@ -38,7 +38,7 @@ const upload = multer({storage:storage})
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
 app.post('/api/create/product' , upload.fields([{name:'image' ,maxCount:3 }, {name: 'video', maxCount:1}]) , (req ,res )=>{
-    res.send(req.files)
+    res.send(req.files) // this is to check wheather the file is present or not
 })
 app.get('/api/vegetables' , authenticateUser , authorizeUser(['buyer']) , ()=>{
     console.log('all the vegetables')
