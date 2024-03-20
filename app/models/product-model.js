@@ -1,6 +1,10 @@
 const {Schema , model } = require('mongoose')
 
 const productSchema = new Schema({
+    sellerId:{
+        type:Schema.Types.ObjectId, 
+        ref:'User'
+    },
     productName:String ,
     productImg:String,
     productVideo:String,
