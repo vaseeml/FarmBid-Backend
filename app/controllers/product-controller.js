@@ -7,12 +7,14 @@ productCtrl.create=async(req,res)=>{
         return res.status(400).json({errors:errors.array()})
     }
     try{
-        const {body,file}=req
+        const {body,files}=req
         const product=new Product(body)
-        product.productVideo=file.path
+        product.productImg = files.productImg[0].path
+        product.productVideo = files.productVideo[0].path
         await product.save()
         res.status(201).json(product)
     }catch(err){
+        console.log(err)
         res.status(400).json('Internal server error')
     }
 }
