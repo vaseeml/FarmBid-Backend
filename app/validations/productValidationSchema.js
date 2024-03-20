@@ -2,10 +2,10 @@
 const productCreateSchema = {
     productName:{
         exists:{
-            errorMessage:'product category is required'
+            errorMessage:'product name is required'
         },
         notEmpty:{
-            errorMessage:'product category cannot be empty'
+            errorMessage:'product name cannot be empty'
         }
     },
     productImg:{
@@ -18,15 +18,15 @@ const productCreateSchema = {
         custom: {
             options: async (value, { req }) => {
                 if (!value) {
-                    return Promise.reject('Image is required');
+                    throw new Error('Image is required');
                 }
                 // Check if the file is a valid image file
                 const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
                 const fileMimeType = req.file.mimetype;
                 if (!imageMimeTypes.includes(fileMimeType)) {
-                    return Promise.reject('Invalid image format');
+                    throw new Error('Invalid image format');
                 }
-                return Promise.resolve();
+                return true
             }
         }
     },
