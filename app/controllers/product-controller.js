@@ -16,3 +16,4 @@ productCtrl.create=async(req,res)=>{
         res.status(400).json('Internal server error')
     }
 }
+module.exports = productCtrl

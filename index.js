@@ -10,6 +10,7 @@ const {checkSchema} = require('express-validator')
 const userCtrl = require('./app/controllers/user-controller')
 const {userRegisterSchema, userLoginSchema} = require('./app/validations/userValidationSchema')
 const { authenticateUser, authorizeUser } = require('./app/middlewares/auth')
+const productCtrl = require('./app/controllers/product-controller')
 const multer = require('multer')
 configureDB()
 const storage=multer.diskStorage({
@@ -29,9 +30,7 @@ const storage=multer.diskStorage({
 const upload=multer({storage:storage})
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    res.send('File uploaded successfully');
-  });
+app.post('/api/create-product', upload.single('file'),authenticateUser , authorizeUser(['seller']) , productCtrl.create);
 
 app.get('/api/vegetables' , authenticateUser , authorizeUser(['buyer']) , ()=>{
     console.log('all the vegetables')
