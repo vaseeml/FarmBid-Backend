@@ -1,5 +1,6 @@
 const {validationResult} = require('express-validator')
 const User = require('../models/user-model')
+const Wallet = require('../models/wallet-model')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const userCtrl = {}
@@ -42,10 +43,17 @@ userCtrl.login = async(req ,res)=>{
         if(!checkPassword){
            return res.status(401).json('Invalid Email/Password')
         }
+        // checking the wallet of user 
+        const userWallet = await Wallet.findOne({userId:user._id})
+        if(!userWallet){
+            const wallet = new Wallet({userId:user._id , balance:0})
+            await wallet.save()
+        }
         const tokenData = {
             id:user._id,
             role:user.role
         }
+        // Generating the token for authenticated user
         const token = jwt.sign(tokenData , process.env.JWT_SECRETKEY , {expiresIn:'7d'} )
         res.json({token:token})
     }
