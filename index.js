@@ -13,6 +13,8 @@ const {userRegisterSchema, userLoginSchema} = require('./app/validations/userVal
 const { authenticateUser, authorizeUser } = require('./app/middlewares/auth')
 const productCtrl = require('./app/controllers/product-controller')
 const productCreateSchema = require('./app/validations/productValidationSchema')
+const walletValidationSchema = require('./app/validations/walletValidationSchema')
+const walletCtrl = require('./app/controllers/wallet-controller')
 const multer = require('multer')
 configureDB()
 const storage = multer.diskStorage({
@@ -44,6 +46,10 @@ app.get('/api/list/vegetables' , authenticateUser , authorizeUser(['buyer']) , p
 app.get('/api/vegetables/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own posted vegetables
 app.delete('/api/delete/:id' , authenticateUser, authorizeUser(['seller']) , productCtrl.destroy)
 app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload.fields([{name:'productImg' , maxCount:3},{name:'productVideo', maxCount:1}]), checkSchema(productCreateSchema) , productCtrl.update)
+
+
+app.put('/api/wallet/:id/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
+
 app.listen(port , ()=>{
     console.log('server is running successfully on port ' , port)
 })
