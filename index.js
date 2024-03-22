@@ -14,10 +14,15 @@ const { authenticateUser, authorizeUser } = require('./app/middlewares/auth')
 const productCtrl = require('./app/controllers/product-controller')
 const productCreateSchema = require('./app/validations/productValidationSchema')
 const multer = require('multer')
+const profileValidationSchema = require('./app/validations/profileValidationSchema')
+const profileCtrl = require('./app/controllers/profile-controller')
 configureDB()
 const storage = multer.diskStorage({
     destination:(req ,file , cb)=>{
-        if(file.mimetype.startsWith('video')){
+        if(file.fieldname=='profilePhoto' && file.mimetype.startsWith('image')){
+            cb(null,'./app/files/profileImages')
+        }
+        else if(file.mimetype.startsWith('video')){
             cb(null , './app/files/videos')
         }else if(file.mimetype.startsWith('image')){
             cb(null , './app/files/images')
@@ -32,12 +37,17 @@ const storage = multer.diskStorage({
 // Serve static files from the 'file' directory
 app.use('/vidos', express.static(path.join(__dirname, 'videos')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/profileImages', express.static(path.join(__dirname, 'profileImages')));
 const upload = multer({storage:storage})
 
 //api requests
 
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
+app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),checkSchema(profileValidationSchema),profileCtrl.create)
+app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),profileCtrl.edit)
+app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profileCtrl.account)
+
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
 app.get('/api/vegetables' , productCtrl.list) // common request for all before loggedIn
 app.get('/api/list/vegetables' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
