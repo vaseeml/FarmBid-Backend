@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator")
 const Profile = require("../models/profile-model")
-const User = require("../models/userModel")
+const User = require("../models/user-model")
 const _ = require('lodash')
 const profileCtrl={}
 profileCtrl.create=async(req,res)=>{
