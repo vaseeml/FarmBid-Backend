@@ -59,7 +59,7 @@ app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload
 
 
 app.put('/api/wallet/:id/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
-
+app.get('/api/wallet/:id' , walletCtrl.show )
 app.listen(port , ()=>{
     console.log('server is running successfully on port ' , port)
 })
