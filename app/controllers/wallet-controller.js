@@ -3,7 +3,7 @@ const Wallet = require("../models/wallet-model")
 const _ = require('lodash')
 
 const walletCtrl = {}
-
+// updating wallet after payment sucessfull 
 walletCtrl.update = async (req, res)=>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){
