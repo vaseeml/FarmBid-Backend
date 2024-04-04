@@ -1,5 +1,10 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+
+const Payment = require('../models/payment-model')
 const _ = require('lodash')
+const paymentsCtrl = {}
+
+// Ctrl for making payment
 paymentsCtrl.pay = async(req ,res )=>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){
@@ -7,7 +12,7 @@ paymentsCtrl.pay = async(req ,res )=>{
     }
     const body = _.pick(req.body , ['walletId' , 'amount'])
     try{
-        const customer = await stripe.customer.create({
+        const customer = await stripe.customers.create({
             name:'Testing',
             address:{
                 line1:'India',
@@ -19,7 +24,7 @@ paymentsCtrl.pay = async(req ,res )=>{
         })
         const session = await stripe.checkout.sessions.create({
             payment_method_types:['card'],
-            line_itmes:[{
+            line_items:[{
                 price_data:{
                     currency:'inr',
                     product_data:{
@@ -30,8 +35,8 @@ paymentsCtrl.pay = async(req ,res )=>{
                 quantity:1
             }],
             mode:'payment',
-            success_url:'http://localhost:3000/payment-success',
-            cancel_url:'http://localhost:3000/payment-cancel',
+            success_url:'http://localhost:3001/payment-success',
+            cancel_url:'http://localhost:3001/payment-cancel',
             customer:customer.id
         })
         
@@ -49,6 +54,7 @@ paymentsCtrl.pay = async(req ,res )=>{
     }
 }
 
+// updating the payment after success in payment
 paymentsCtrl.successUpdate = async(req , res)=>{
     try{
         const id = req.params.id
@@ -61,6 +67,7 @@ paymentsCtrl.successUpdate = async(req , res)=>{
     }
 }
 
+//updating the payment after failure in payment
 paymentsCtrl.failedUpdate = async(req , res)=>{
     try{
         const id = req.params.id
