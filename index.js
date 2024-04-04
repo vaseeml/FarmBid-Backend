@@ -1,13 +1,48 @@
 require('dotenv').config()
 const express = require('express')
+const socketIO = require('socket.io')
+const http = require('http')
 const cors = require('cors')
 const port = process.env.PORT || 3999
 const app = express()
 const path = require('path')
+const configureDB = require('./config/db')
 app.use(cors())
 app.use(express.json())
-const configureDB = require('./config/db')
-const {checkSchema} = require('express-validator')
+const bidCtrl = require('./app/controllers/bid-controller')
+// Create an HTTP server using the Express app
+const server = http.createServer(app)
+
+// Create a Socket.IO instance by passing the HTTP server
+const io = socketIO(server)
+
+
+// Handle Socket.IO connections
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    // Join a private room when the client requests to join a product
+    socket.on('joinProductRoom', (productId) => {
+        // Leave any existing rooms
+        socket.leaveAll();
+        // Join the room associated with the product
+        socket.join(productId);
+        console.log(`Client ${socket.id} joined room for product ${productId}`);
+    });
+  
+  
+    // Handle bid update event
+    socket.on('bidUpdate', (bidUpdateData) => {
+      // Process bid update data
+      // Broadcast bid update to all connected clients
+      io.emit('updatedBid', bidUpdateData);
+    });
+  
+    // Handle disconnection
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
+    });
+  });
+  
 
 const multer = require('multer')
 
@@ -22,6 +57,7 @@ const paymentsCtrl = require('./app/controllers/payment-controller')
 
 
 // Requiring Schema Validations
+const {checkSchema} = require('express-validator')
 const {userRegisterSchema, userLoginSchema} = require('./app/validations/userValidationSchema')
 const productCreateSchema = require('./app/validations/productValidationSchema')
 const walletValidationSchema = require('./app/validations/walletValidationSchema')
@@ -66,9 +102,9 @@ app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profil
 
 // api requests for product(vegetables)
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
-app.get('/api/vegetables' , productCtrl.list) // common request for all before loggedIn
-app.get('/api/list/vegetables' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
-app.get('/api/vegetables/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own posted vegetables
+app.get('/api/porducts' , productCtrl.list) // common request for all before loggedIn
+app.get('/api/list/porducts' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
+app.get('/api/porducts/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own vegetables porducts
 app.delete('/api/delete/:id' , authenticateUser, authorizeUser(['seller']) , productCtrl.destroy)
 app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload.fields([{name:'productImg' , maxCount:3},{name:'productVideo', maxCount:1}]), checkSchema(productCreateSchema) , productCtrl.update)
 
@@ -81,7 +117,9 @@ app.post('/api/create-checkout-session' ,checkSchema(paymentsValidationSchema), 
 app.put('/api/success-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.successUpdate)
 app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.failedUpdate)
 
-
-app.listen(port , ()=>{
+app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
+    bidCtrl.newBid(io , req ,res)
+})
+server.listen(port , ()=>{
     console.log('server is running successfully on port ' , port)
 })
