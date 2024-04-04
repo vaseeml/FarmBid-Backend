@@ -61,7 +61,7 @@ paymentsCtrl.successUpdate = async(req , res)=>{
     }
 }
 
-paymentCtrl.failedUpdate = async(req , res)=>{
+paymentsCtrl.failedUpdate = async(req , res)=>{
     try{
         const id = req.params.id
         const body = _.pick(req.body , ['paymentStatus'])

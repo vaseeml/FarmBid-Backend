@@ -27,22 +27,10 @@ const paymentsValidationSchema = {
             errorMessage:'Amount cannot be empty'
         },
         isNumeric:{
-            options:{min:0,max:9999999},
+            options:{min:1},
             errorMessage:'Amount should be a number'
         }
-        // custom: {
-        //     //checks wheather amount matches to specific wallet
-        //     options: async (value, { req, res }) => {
-        //       const id = req.body.walletId
-        //       const amount = req.body.amount
-        //       const findwallet = await Wallet.findById(id)
-        //       if (findwallet.amount == amount) {
-        //         return true
-        //       } else {
-        //         throw new Error("Invalid amount")
-        //       }
-        //     }
-        // }   
+        
     }
 }
 
