@@ -16,8 +16,9 @@ walletCtrl.update = async (req, res)=>{
         if(!wallet){
             return res.status(404).json({error:'Wallet Not Found'})
         }
-        const newBalance = wallet.balance + body.amount
-        const updateWallet = await Wallet.findOneAndUpdate({_id:id , userId:req.user.id}, {balance:newBalance} , {new:true})
+       
+        const newBalance = wallet.balance + Number(body.balance)
+        const updateWallet = await Wallet.findOneAndUpdate({_id:id}, {balance:newBalance} , {new:true})
         res.json(updateWallet)
     }catch(err){
         console.log(err)
