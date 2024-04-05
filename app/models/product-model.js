@@ -11,7 +11,10 @@ const productSchema = new Schema({
     basePrice:String,
     stock:String,
     weight:String,
-    address:String
+    address:String,
+    biddingStart: { type: Date, required: true },
+    biddingEnd: { type: Date, required: true },
+    biddingStatus: { type: String, enum: ['open', 'closed'], default: 'open' }
 },{timestamps:true})
 
 const Product = model('Product' , productSchema)

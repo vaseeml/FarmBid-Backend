@@ -7,14 +7,24 @@ const port = process.env.PORT || 3999
 const app = express()
 const path = require('path')
 const configureDB = require('./config/db')
-app.use(cors())
+app.use(cors({
+    origin:'http://localhost:3001',
+    methods:['GET' , 'POST'],
+    credentials:true
+}))
 app.use(express.json())
 const bidCtrl = require('./app/controllers/bid-controller')
 // Create an HTTP server using the Express app
 const server = http.createServer(app)
 
 // Create a Socket.IO instance by passing the HTTP server
-const io = socketIO(server)
+const io = socketIO(server,{
+    cors:{
+        origin:'http://localhost:3001',
+        methods:['GET' , 'POST'],
+        credentials:true
+    }
+})
 
 
 // Handle Socket.IO connections
@@ -102,9 +112,9 @@ app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profil
 
 // api requests for product(vegetables)
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
-app.get('/api/porducts' , productCtrl.list) // common request for all before loggedIn
-app.get('/api/list/porducts' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
-app.get('/api/porducts/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own vegetables porducts
+app.get('/api/products' , productCtrl.list) // common request for all before loggedIn
+app.get('/api/list/products' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
+app.get('/api/products/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own vegetables porducts
 app.delete('/api/delete/:id' , authenticateUser, authorizeUser(['seller']) , productCtrl.destroy)
 app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload.fields([{name:'productImg' , maxCount:3},{name:'productVideo', maxCount:1}]), checkSchema(productCreateSchema) , productCtrl.update)
 
@@ -117,6 +127,7 @@ app.post('/api/create-checkout-session' ,checkSchema(paymentsValidationSchema), 
 app.put('/api/success-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.successUpdate)
 app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.failedUpdate)
 
+// api requests for bids
 app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
     bidCtrl.newBid(io , req ,res)
 })
