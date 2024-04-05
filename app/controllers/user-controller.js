@@ -77,7 +77,7 @@ userCtrl.update = async(req ,res)=>{
         const encryptedPass = await bcryptjs.hash(body.password , salt)
         user.password = encryptedPass
         await user.save()
-        res.json(user)
+        res.json('updated password successfully')
     }catch(err){
         console.log(err)
         res.status(500).json({error:'Internal Server Errors'})
