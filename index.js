@@ -64,6 +64,7 @@ const productCtrl = require('./app/controllers/product-controller')
 const walletCtrl = require('./app/controllers/wallet-controller')
 const profileCtrl = require('./app/controllers/profile-controller')
 const paymentsCtrl = require('./app/controllers/payment-controller')
+const {orderCtrl}=require('./app/controllers/order-controller')
 
 
 // Requiring Schema Validations
@@ -73,6 +74,7 @@ const productCreateSchema = require('./app/validations/productValidationSchema')
 const walletValidationSchema = require('./app/validations/walletValidationSchema')
 const profileValidationSchema = require('./app/validations/profileValidationSchema')
 const paymentsValidationSchema = require('./app/validations/paymentValidationSchema')
+const otpCtrl = require('./app/controllers/otp-controller')
 
 configureDB()
 
@@ -104,6 +106,7 @@ const upload = multer({storage:storage})
 //api requests for users
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
+app.post('/api/update/password' , userCtrl.update)
 
 //api requests for profile
 app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),checkSchema(profileValidationSchema),profileCtrl.create)
@@ -131,6 +134,14 @@ app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), payment
 app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
     bidCtrl.newBid(io , req ,res)
 })
+
+// api requests for orders
+app.get('/api/orders',authenticateUser,authenticateUser(['seller','buyer']), orderCtrl.list)
+
+//api requests for otp
+app.post('/api/send-otp',otpCtrl.create)
+app.post('/api/verify-otp',otpCtrl.verify)
+
 server.listen(port , ()=>{
     console.log('server is running successfully on port ' , port)
 })

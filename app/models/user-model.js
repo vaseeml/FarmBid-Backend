@@ -10,7 +10,8 @@ const userSchema = new Schema({
     isBlock:{
         type:Boolean,
         default:false
-    }
+    },
+    otp:Number
 }, {timestamps:true})
 
 const User = model('User' , userSchema)
