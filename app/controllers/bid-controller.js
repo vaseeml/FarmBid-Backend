@@ -53,7 +53,7 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         //saving new bidder record
         await bid.save()
         if(product && !product.biddingEnd){
-            const currentTime = Date.now()
+            const currentTime = new Date()
             currentTime.setMinutes(currentTime.getMinutes() + 10)
             product.biddingEnd = currentTime
             await product.save()
@@ -68,8 +68,9 @@ bidCtrl.newBid = async(io ,req ,res )=>{
 
 const checkBiddingStatus = async(req , res)=>{
     try{
-        const currentTime = Date.now()
+        const currentTime = new Date()
         const products = await Product.find({biddingEnd:{$lte:currentTime}})
+        // console.log(products)
         for(const product of products){
            const lastBid = await Bid.findOne({productId:product._id}).sort({createdAt:-1}).exec()
            if(lastBid){
@@ -78,7 +79,7 @@ const checkBiddingStatus = async(req , res)=>{
                 product.biddingStatus = 'closed'
                 await product.save()
                 await lastBid.save()
-                createOrder(lastBid)
+                await createOrder(lastBid)
            }else{
             console.log('No Product Is Found For ' , product._id)
            }
@@ -96,5 +97,5 @@ cron.schedule('* * * * *', async () => {
     } catch (error) {
       console.error('Error occurred while checking bidding status:', error)
     }
-  })
+})
 module.exports = bidCtrl

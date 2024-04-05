@@ -24,13 +24,17 @@ orderCtrl.list=async(req,res)=>{
 }
 const createOrder=async(lastBid)=>{
     try{
-        const order=new Order({
-            product:lastBid.productId,
-            bidder:lastBid.bidderId,
-            bidAmount:lastBid.amount
-        })
-        await order.save()
-        console.log('Order created successfully:', order)
+        const productOrder = await Order.findOne({product:lastBid.productId})
+        if(!productOrder){
+            const order=new Order({
+                product:lastBid.productId,
+                bidder:lastBid.bidderId,
+                bidAmount:lastBid.amount
+            })
+            await order.save()
+            console.log('Order created successfully:', order)
+        }
+        console.log('order already placed')
     }catch(err){
         console.log(err)
     }
