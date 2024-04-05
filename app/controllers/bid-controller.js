@@ -78,7 +78,7 @@ const checkBiddingStatus = async(req , res)=>{
                 product.biddingStatus = 'closed'
                 await product.save()
                 await lastBid.save()
-                createOrder(lastBid)
+                await createOrder(lastBid)
            }else{
             console.log('No Product Is Found For ' , product._id)
            }

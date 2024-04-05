@@ -142,7 +142,7 @@ app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=
 
 
 // api requests for orders
-app.get('/api/orders',authenticateUser,authenticateUser(['seller','buyer']), orderCtrl.list)
+app.get('/api/orders',authenticateUser,authorizeUser(['seller','buyer']), orderCtrl.list)
 
 //api requests for otp
 app.post('/api/send-otp',otpCtrl.create)
