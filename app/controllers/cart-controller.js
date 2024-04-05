@@ -4,7 +4,7 @@ const cartCtrl = {}
 
 cartCtrl.list = async(req ,res)=>{
     try{
-        const carts = await Cart.find({user:req.user.id}).populate('user' , ['name', 'email','phone'])
+        const carts = await Cart.find({user:req.user.id})
         res.json(carts)
     }catch(err){
         console.log(err)
@@ -19,9 +19,9 @@ cartCtrl.create = async(req ,res)=>{
     try{
         const {body} = req
         const cart = new Cart(body)
+        cart.user = req.user.id
         await cart.save()
-        const cartDetails = await Cart.find().populate('product').populate('sellerId' ,['name', 'email', 'phone'] )
-        res.status(201).json(cartDetails)
+        res.status(201).json(cart)
     }catch(err){
         console.log(err)
         res.status(500).json({error:'Internal Server Errors'})
