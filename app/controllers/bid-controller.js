@@ -3,6 +3,7 @@ const Product = require('../models/product-model')
 const Wallet = require('../models/wallet-model')
 const _ = require('lodash')
 const cron = require('node-cron')
+const {createOrder} = require('./order-controller')
 const bidCtrl = {}
 
 bidCtrl.newBid = async(io ,req ,res )=>{
@@ -77,6 +78,7 @@ const checkBiddingStatus = async(req , res)=>{
                 product.biddingStatus = 'closed'
                 await product.save()
                 await lastBid.save()
+                createOrder(lastBid)
            }else{
             console.log('No Product Is Found For ' , product._id)
            }

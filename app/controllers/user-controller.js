@@ -63,4 +63,24 @@ userCtrl.login = async(req ,res)=>{
     }
 }
 
+userCtrl.update = async(req ,res)=>{
+    const body = req.body
+    if(!body.phone && !body.password){
+        return res.status(400).json({error:'Fields Cannot Be Empty'})
+    }
+    try{
+        const user = await User.findOne({phone:body.phone})
+        if(!user){
+            return res.status(404).json({error:'user not found'})
+        }
+        const salt =await bcryptjs.genSalt()
+        const encryptedPass = await bcryptjs.hash(body.password , salt)
+        user.password = encryptedPass
+        await user.save()
+        res.json('updated password successfully')
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
 module.exports = userCtrl
