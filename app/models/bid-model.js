@@ -15,9 +15,8 @@ const bidSchema=new Schema({
         default:'Active'
     },
     winner:{
-        type:String,
-        enum:['Lost','Won'],
-        default:'Lost'
+        type:Boolean,
+        default:false
     }
 },{timestamps:true})
 const Bid=model('Bid',bidSchema)
