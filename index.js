@@ -64,6 +64,7 @@ const productCtrl = require('./app/controllers/product-controller')
 const walletCtrl = require('./app/controllers/wallet-controller')
 const profileCtrl = require('./app/controllers/profile-controller')
 const paymentsCtrl = require('./app/controllers/payment-controller')
+const cartCtrl = require('./app/controllers/cart-controller')
 
 
 // Requiring Schema Validations
@@ -73,6 +74,7 @@ const productCreateSchema = require('./app/validations/productValidationSchema')
 const walletValidationSchema = require('./app/validations/walletValidationSchema')
 const profileValidationSchema = require('./app/validations/profileValidationSchema')
 const paymentsValidationSchema = require('./app/validations/paymentValidationSchema')
+const cartValidationSchema = require('./app/validations/cartValidationSchema')
 
 configureDB()
 
@@ -131,6 +133,12 @@ app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), payment
 app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
     bidCtrl.newBid(io , req ,res)
 })
+
+// api for cart system
+app.get('/api/cart' , authenticateUser , authorizeUser(['buyer']) , cartCtrl.list)
+app.post('/api/cart' , authenticateUser , authorizeUser(['buyer']) ,checkSchema(cartValidationSchema) , cartCtrl.create)
+app.delete('/api/cart/:id', authenticateUser , authorizeUser(['buyer']) , cartCtrl.destroy)
+
 server.listen(port , ()=>{
     console.log('server is running successfully on port ' , port)
 })
