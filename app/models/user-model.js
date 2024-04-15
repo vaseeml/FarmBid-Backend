@@ -11,7 +11,11 @@ const userSchema = new Schema({
         type:Boolean,
         default:false
     },
-    otp:Number
+    otp:Number,
+    otpExpiration:{
+        type:Date,
+        default:null
+    }
 }, {timestamps:true})
 
 const User = model('User' , userSchema)
