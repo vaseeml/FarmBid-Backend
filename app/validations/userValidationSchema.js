@@ -91,12 +91,12 @@ const userRegisterSchema = {
 }
 
 const userLoginSchema = {
-    email:{
+    loginId:{
         exists:{
-            errorMessage:'email is required'
+            errorMessage:'email/phone is required'
         },
         notEmpty:{
-            errorMessage:'email cannot be empty'
+            errorMessage:'email/phone cannot be empty'
         }
     },
     password:{

@@ -25,7 +25,7 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         bid.amount = Number(body.amount)
         // finding wallet with userId
         const newBidderWallet = await Wallet.findOne({userId:req.user.id})
-
+        
         // if not returning the user
         if(!newBidderWallet){
             return res.status(404).json({error:'Wallet Not Found'})
@@ -36,6 +36,10 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         }
         // updating the previous bid status 
         const updateStatus = await Bid.findOne({productId:body.productId ,status:'Active'})
+        // checking previous bid amount with new bid amount
+        if(updateStatus.amount < Number(body.amount)){
+            return res.status(400).json({error:'Invalid Bid Amount/Previous Bid Amount'})
+        }
         if(updateStatus){  
             const wallet = await Wallet.findOne({userId:updateStatus.bidderId})
             if(wallet){
@@ -69,7 +73,7 @@ bidCtrl.newBid = async(io ,req ,res )=>{
 const checkBiddingStatus = async(req , res)=>{
     try{
         const currentTime = new Date()
-        const products = await Product.find({biddingEnd:{$lte:currentTime}})
+        const products = await Product.find({biddingEnd:{$lte:currentTime} ,biddingStatus:'open' })
         // console.log(products)
         for(const product of products){
            const lastBid = await Bid.findOne({productId:product._id}).sort({createdAt:-1}).exec()

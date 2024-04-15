@@ -34,8 +34,9 @@ userCtrl.login = async(req ,res)=>{
         return res.status(400).json({errors:errors.array()})
     }
     const {body} = req
+    console.log(body)
     try{
-        const user = await User.findOne({email:body.email})
+        const user = await User.findOne({$or:[{email:body.loginId}, {phone:body.loginId}]})
         if(!user){
             return res.status(404).json('Invalid Email/Password')
         }
@@ -65,7 +66,7 @@ userCtrl.login = async(req ,res)=>{
 
 userCtrl.update = async(req ,res)=>{
     const body = req.body
-    if(!body.phone && !body.password){
+    if(!body.phone || !body.password){
         return res.status(400).json({error:'Fields Cannot Be Empty'})
     }
     try{
@@ -77,7 +78,7 @@ userCtrl.update = async(req ,res)=>{
         const encryptedPass = await bcryptjs.hash(body.password , salt)
         user.password = encryptedPass
         await user.save()
-        res.json('updated password successfully')
+        res.json({message:'updated password successfully'})
     }catch(err){
         console.log(err)
         res.status(500).json({error:'Internal Server Errors'})
