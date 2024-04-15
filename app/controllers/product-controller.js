@@ -16,16 +16,16 @@ productCtrl.create=async(req,res)=>{
         res.status(201).json(product)
     }catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 productCtrl.list = async(req, res)=>{
     try{
-        const product = await Product.find()
+        const product = await Product.find().populate('sellerId' , ['name' , 'phone' , 'email'])
         res.status(200).json(product)
     }catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 productCtrl.myVeg = async(req, res)=>{
@@ -34,7 +34,7 @@ productCtrl.myVeg = async(req, res)=>{
         res.status(200).json(myVeg)
     }catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 productCtrl.destroy = async(req, res)=>{
@@ -47,7 +47,7 @@ productCtrl.destroy = async(req, res)=>{
         res.json(product)
     }catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 productCtrl.update = async(req, res)=>{
@@ -71,7 +71,7 @@ productCtrl.update = async(req, res)=>{
         res.json(product)
     }catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 module.exports = productCtrl

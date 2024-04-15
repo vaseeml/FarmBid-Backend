@@ -103,8 +103,8 @@ const storage = multer.diskStorage({
 })
 
 // Serve static files from the 'file' directory
-app.use('/vidos', express.static(path.join(__dirname, 'videos')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/app/files/videos', express.static(path.join(__dirname, 'app/files/vidoes')));
+app.use('/app/files/images', express.static(path.join(__dirname, 'app/files/images')));
 app.use('/profileImages', express.static(path.join(__dirname, 'profileImages')));
 const upload = multer({storage:storage})
 
