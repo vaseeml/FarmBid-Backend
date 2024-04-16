@@ -70,11 +70,12 @@ bidCtrl.newBid = async(io ,req ,res )=>{
     }
 }
 
-const checkBiddingStatus = async(req , res)=>{
+const checkBiddingStatus = async()=>{
+    console.log('checking every minute')
     try{
         const currentTime = new Date()
         const products = await Product.find({biddingEnd:{$lte:currentTime} ,biddingStatus:'open' })
-        // console.log(products)
+        console.log(products)
         for(const product of products){
            const lastBid = await Bid.findOne({productId:product._id}).sort({createdAt:-1}).exec()
            if(lastBid){

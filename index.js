@@ -7,11 +7,7 @@ const port = process.env.PORT || 3999
 const app = express()
 const path = require('path')
 const configureDB = require('./config/db')
-app.use(cors({
-    origin:'http://localhost:3001',
-    methods:['GET' , 'POST'],
-    credentials:true
-}))
+app.use(cors())
 app.use(express.json())
 const bidCtrl = require('./app/controllers/bid-controller')
 // Create an HTTP server using the Express app
@@ -127,10 +123,12 @@ app.get('/api/list/products' , authenticateUser , authorizeUser(['buyer']) , pro
 app.get('/api/products/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own vegetables porducts
 app.delete('/api/delete/:id' , authenticateUser, authorizeUser(['seller']) , productCtrl.destroy)
 app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload.fields([{name:'productImg' , maxCount:3},{name:'productVideo', maxCount:1}]), checkSchema(productCreateSchema) , productCtrl.update)
-
+app.get('/api/products/upcoming' , authenticateUser , authorizeUser(['seller' , 'buyer']) , productCtrl.getUpcoming)
 //api requests for wallet
-app.put('/api/wallet/:id/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
-app.get('/api/wallet', authenticateUser, walletCtrl.show )
+
+app.put('/api/wallet/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
+app.get('/api/wallet' , authenticateUser , authorizeUser(['buyer' , 'seller']),walletCtrl.show )
+
 
 //api requests for payment
 app.post('/api/create-checkout-session' ,checkSchema(paymentsValidationSchema), paymentsCtrl.pay)

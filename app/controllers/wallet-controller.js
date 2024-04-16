@@ -9,11 +9,10 @@ walletCtrl.update = async (req, res)=>{
     if(!errors.isEmpty()){
         return res.status(400).json({errors:errors.array()})
     }
-    const id = req.params.id
     const body = _.pick(req.body , ['balance'])
     try{
         // finding wallet 
-        const wallet = await Wallet.findOne({_id:id , userId:req.user.id})
+        const wallet = await Wallet.findOne({userId:req.user.id})
         // returning user if not found
         if(!wallet){
             return res.status(404).json({error:'Wallet Not Found'})
@@ -21,7 +20,7 @@ walletCtrl.update = async (req, res)=>{
         //updating wallet balance with new Add balance
         const newBalance = wallet.balance + Number(body.balance)
         // updating to model
-        const updateWallet = await Wallet.findOneAndUpdate({_id:id}, {balance:newBalance} , {new:true})
+        const updateWallet = await Wallet.findOneAndUpdate({_id:wallet._id}, {balance:newBalance} , {new:true})
         res.json(updateWallet)
     }catch(err){
         console.log(err) 
@@ -29,10 +28,9 @@ walletCtrl.update = async (req, res)=>{
     }
 }
 walletCtrl.show = async(req, res)=>{
-    const id = req.user.id
     try{
         // finding wallet to show user
-        const wallet = await Wallet.findOne({userId:id})
+        const wallet = await Wallet.findOne({userId:req.user.id})
         res.json(wallet)
     }catch(err){
         console.log(err)
