@@ -74,4 +74,24 @@ productCtrl.update = async(req, res)=>{
         res.status(500).json({error:'Internal Server Errors'})
     }
 }
+productCtrl.getUpcoming = async(req , res)=>{
+    const role = req.query.role
+    if(!role){
+        return res.status(400).json({error:'Role is required'})
+    }
+    const currentTime = new Date()
+    try{
+        if(role === 'seller'){
+            const products = await Product.find({sellerId:req.user.id , biddingStart:{$gt:currentTime}})
+            res.json(products)
+        }
+        if(role == 'buyer'){
+            const products = await Product.find({biddingStart:{$gt:currentTime}})
+            res.json(products)
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
 module.exports = productCtrl
