@@ -103,8 +103,8 @@ const storage = multer.diskStorage({
 })
 
 // Serve static files from the 'file' directory
-app.use('/app/files/videos', express.static(path.join(__dirname, 'app/files/vidoes')));
-app.use('/app/files/images', express.static(path.join(__dirname, 'app/files/images')));
+// app.use('/app/files/videos', express.static(path.join(__dirname, 'app/files/vidoes')));
+app.use('/app/files', express.static(path.join(__dirname, 'app/files')));
 app.use('/profileImages', express.static(path.join(__dirname, 'profileImages')));
 const upload = multer({storage:storage})
 
@@ -121,6 +121,8 @@ app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profil
 // api requests for product(vegetables)
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
 app.get('/api/products' , productCtrl.list) // common request for all before loggedIn
+app.get('/api/products/live',authenticateUser,authorizeUser(['seller','buyer']),productCtrl.getLive)
+app.get('/api/products/completed',authenticateUser,authorizeUser(['seller','buyer']),productCtrl.getCompleted)
 app.get('/api/list/products' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
 app.get('/api/products/my' , authenticateUser , authorizeUser(['seller']), productCtrl.myVeg) // api for seller to see thier own vegetables porducts
 app.delete('/api/delete/:id' , authenticateUser, authorizeUser(['seller']) , productCtrl.destroy)
@@ -128,7 +130,7 @@ app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload
 
 //api requests for wallet
 app.put('/api/wallet/:id/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
-app.get('/api/wallet/:id' , walletCtrl.show )
+app.get('/api/wallet', authenticateUser, walletCtrl.show )
 
 //api requests for payment
 app.post('/api/create-checkout-session' ,checkSchema(paymentsValidationSchema), paymentsCtrl.pay)

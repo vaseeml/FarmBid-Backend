@@ -29,10 +29,10 @@ walletCtrl.update = async (req, res)=>{
     }
 }
 walletCtrl.show = async(req, res)=>{
-    const id = req.params.id
+    const id = req.user.id
     try{
         // finding wallet to show user
-        const wallet = await Wallet.findById(id)
+        const wallet = await Wallet.findOne({userId:id})
         res.json(wallet)
     }catch(err){
         console.log(err)
