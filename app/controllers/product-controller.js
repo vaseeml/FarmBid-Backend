@@ -1,5 +1,6 @@
 const {validationResult}=require('express-validator')
 const Product = require('../models/product-model')
+const Bid = require('../models/bid-model')
 productCtrl={}
 productCtrl.create=async(req,res)=>{
     const errors=validationResult(req)
@@ -23,6 +24,50 @@ productCtrl.list = async(req, res)=>{
     try{
         const product = await Product.find().populate('sellerId' , ['name' , 'phone' , 'email'])
         res.status(200).json(product)
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+productCtrl.getLive=async(req,res)=>{
+    try{
+        const role=req.query.role
+        if (!role) {
+            return res.status(400).json({ error: 'Role is required' })
+        }
+        const currentTime = new Date()
+        if(role=='seller'){
+            const products=await Product.find({sellerId:req.user.id , biddingStart:{$lte:currentTime}})
+            res.json(products)
+        }
+        if(role=='buyer'){
+            const products=await Product.find({biddingStart:{$lte:currentTime}})
+            res.json(products)
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+productCtrl.getCompleted=async(req,res)=>{
+    try{
+        const role=req.query.role
+        if (!role) {
+            return res.status(400).json({ error: 'Role is required' })
+        }
+        const currentTime = new Date()
+        if(role=='seller'){
+            const products=await Product.find({sellerId:req.user.id , biddingEnd:{$lte:currentTime},biddingStatus:'closed'})
+            res.json(products)
+        }
+        if(role=='buyer'){
+            const bids =await Bid.find({bidderId:req.user.id , winner:true})
+            const productIds = bids.map((ele)=>{
+                return ele.productId
+            })
+            const products=await Product.find({ _id: { $in: productIds } })
+            res.json(products)
+        }
     }catch(err){
         console.log(err)
         res.status(500).json({error:'Internal Server Errors'})
