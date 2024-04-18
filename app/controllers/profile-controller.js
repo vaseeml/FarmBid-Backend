@@ -21,7 +21,7 @@ profileCtrl.create=async(req,res)=>{
         await profile.save()
         res.status(201).json(profile)
     }catch(err){
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 profileCtrl.edit=async(req,res)=>{
@@ -55,7 +55,7 @@ profileCtrl.edit=async(req,res)=>{
 
     }catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
         
     }
 }
@@ -64,8 +64,18 @@ profileCtrl.account=async(req,res)=>{
         const profile=await Profile.findOne({userId:req.user.id})
         res.json(profile)
     }catch(err){
-        res.status(500).json({error:'Internal Server Error'})
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
     }
 
+}
+profileCtrl.all = async(req ,res)=>{
+    try{
+        const profiles = await Profile.find().populate('userId' , ['usernama' , 'email' , 'role'])
+        res.json(profiles)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
 }
 module.exports=profileCtrl

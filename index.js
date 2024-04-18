@@ -120,6 +120,7 @@ app.post('/api/update/password' , userCtrl.update)
 app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),checkSchema(profileValidationSchema),profileCtrl.create)
 app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),profileCtrl.edit)
 app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profileCtrl.account)
+app.get('/api/profiles/all' , authenticateUser , authorizeUser(['admin']) ,profileCtrl.all )
 
 // api requests for product(vegetables)
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
