@@ -34,6 +34,12 @@ io.on('connection', (socket) => {
         socket.join(productId);
         console.log(`Client ${socket.id} joined room for product ${productId}`);
     });
+    // Leave the product room when the client requests to leave
+    socket.on('leaveProductRoom', (productId) => {
+        // Leave the room associated with the product
+        socket.leave(productId);
+        console.log(`Client ${socket.id} left room for product ${productId}`);
+    });
   
   
     // Handle bid update event
@@ -45,7 +51,8 @@ io.on('connection', (socket) => {
   
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+      console.log('Client disconnected:', socket.id)
+      socket.leaveAll()
     });
   });
   
@@ -131,7 +138,7 @@ app.get('/api/wallet' , authenticateUser , authorizeUser(['buyer' , 'seller']),w
 
 
 //api requests for payment
-app.post('/api/create-checkout-session' ,checkSchema(paymentsValidationSchema), paymentsCtrl.pay)
+app.post('/api/create-checkout-session' ,authenticateUser , authorizeUser(['buyer']),checkSchema(paymentsValidationSchema), paymentsCtrl.pay)
 app.put('/api/success-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.successUpdate)
 app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.failedUpdate)
 

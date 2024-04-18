@@ -37,7 +37,7 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         // updating the previous bid status 
         const updateStatus = await Bid.findOne({productId:body.productId ,status:'Active'})
         // checking previous bid amount with new bid amount
-        if(updateStatus.amount < Number(body.amount)){
+        if(updateStatus?.amount > Number(body.amount)){
             return res.status(400).json({error:'Invalid Bid Amount/Previous Bid Amount'})
         }
         if(updateStatus){  

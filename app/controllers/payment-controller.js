@@ -58,8 +58,8 @@ paymentsCtrl.pay = async (req, res) => {
 paymentsCtrl.successUpdate = async (req, res) => {
     try {
         const id = req.params.id
-        const body = _.pick(req.body, ['paymentStatus'])
-        const updatedPayment = await Payment.findOneAndUpdate({ transactionId: id, body })
+        const body = _.pick(req.body , ['paymentStatus'])
+        const updatedPayment = await Payment.findOneAndUpdate({transactionId:id} , body , {new:true})
         res.json(updatedPayment)
     } catch (err) {
         console.log(err)
@@ -71,8 +71,8 @@ paymentsCtrl.successUpdate = async (req, res) => {
 paymentsCtrl.failedUpdate = async (req, res) => {
     try {
         const id = req.params.id
-        const body = _.pick(req.body, ['paymentStatus'])
-        const updatedPayment = await Payment.findOneAndUpdate({ transactionId: id }, body)
+        const body = _.pick(req.body , ['paymentStatus'])
+        const updatedPayment = await Payment.findOneAndUpdate({transactionId:id}, body , {new:true})
         res.json(updatedPayment)
     } catch (err) {
         console.log(err)
