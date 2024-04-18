@@ -1,5 +1,5 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
-
+const { validationResult } = require('express-validator')
 const Payment = require('../models/payment-model')
 const _ = require('lodash')
 const paymentsCtrl = {}
@@ -59,7 +59,7 @@ paymentsCtrl.successUpdate = async(req , res)=>{
     try{
         const id = req.params.id
         const body = _.pick(req.body , ['paymentStatus'])
-        const updatedPayment = await Payment.findOneAndUpdate({transactionId:id , body})
+        const updatedPayment = await Payment.findOneAndUpdate({transactionId:id} , body , {new:true})
         res.json(updatedPayment)
     }catch(err){
         console.log(err)
@@ -72,7 +72,7 @@ paymentsCtrl.failedUpdate = async(req , res)=>{
     try{
         const id = req.params.id
         const body = _.pick(req.body , ['paymentStatus'])
-        const updatedPayment = await Payment.findOneAndUpdate({transactionId:id}, body)
+        const updatedPayment = await Payment.findOneAndUpdate({transactionId:id}, body , {new:true})
         res.json(updatedPayment)
     } catch(err){
         console.log(err)

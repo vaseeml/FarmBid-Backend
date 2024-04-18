@@ -4,7 +4,7 @@ const cartCtrl = {}
 
 cartCtrl.list = async(req ,res)=>{
     try{
-        const carts = await Cart.find({user:req.user.id})
+        const carts = await Cart.find({user:req.user.id}).populate('product')
         res.json(carts)
     }catch(err){
         console.log(err)
