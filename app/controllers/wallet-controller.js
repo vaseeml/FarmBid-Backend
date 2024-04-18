@@ -30,7 +30,7 @@ walletCtrl.update = async (req, res)=>{
 walletCtrl.show = async(req, res)=>{
     try{
         // finding wallet to show user
-        const wallet = await Wallet.findOne({userId:req.user.id})
+        const wallet = await Wallet.findOne({userId:req.user.id}).populate('userId' , ['username' , 'phone' , 'email' , 'role'])
         res.json(wallet)
     }catch(err){
         console.log(err)
