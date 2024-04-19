@@ -105,7 +105,7 @@ productCtrl.update = async (req, res) => {
     const id = req.params.id
     const { body, files } = req
     let updateProduct = { ...body }                        // spreading the body object to get all the existing fields
-
+ 
     if (files.productImg) {
         updateProduct.productImg = files.productImg[0].path // assigning the path to product image
     }

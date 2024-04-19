@@ -66,10 +66,21 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         res.status(201).json(bid)
     } catch(err){
         console.log(err)
-        res.status(500).json({error:'Internal Server Error'})
+        res.status(500).json({error:'Internal Server Errors'})
     }
 }
 
+bidCtrl.list = async(req ,res)=>{
+    const id = req.params.id
+    console.log(id)
+    try{
+        const bids = await Bid.find({bidderId:id}).populate('bidderId' ,['username' , 'role' , 'email' , 'phone'] ).populate('productId')
+        res.json(bids)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
 const checkBiddingStatus = async()=>{
     console.log('checking every minute')
     try{
@@ -77,7 +88,7 @@ const checkBiddingStatus = async()=>{
         const products = await Product.find({biddingEnd:{$lte:currentTime} ,biddingStatus:'open' })
         console.log(products)
         for(const product of products){
-           const lastBid = await Bid.findOne({productId:product._id}).sort({createdAt:-1}).exec()
+           const lastBid = await Bid.findOne({productId:product._id}).populate('productId', ['sellerId']).sort({createdAt:-1}).exec()
            if(lastBid){
                 lastBid.status = 'Finished'
                 lastBid.winner = true

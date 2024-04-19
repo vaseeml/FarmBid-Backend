@@ -147,6 +147,7 @@ app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), payment
 app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
     bidCtrl.newBid(io , req ,res)
 })
+app.get('/api/buyer/:id/bids' , authenticateUser , authorizeUser(['admin']) , bidCtrl.list)
 
 
 // api requests for orders
