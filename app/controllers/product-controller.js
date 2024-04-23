@@ -38,7 +38,7 @@ productCtrl.getLive = async (req, res) => {
         }
         const currentTime = new Date()
         if (role == 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } }).populate('sellerId', ['name', 'phone', 'email'])
+            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } , biddingStatus:'open' }).populate('sellerId', ['username', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
@@ -105,7 +105,7 @@ productCtrl.update = async (req, res) => {
     const id = req.params.id
     const { body, files } = req
     let updateProduct = { ...body }                        // spreading the body object to get all the existing fields
-
+ 
     if (files.productImg) {
         updateProduct.productImg = files.productImg[0].path // assigning the path to product image
     }

@@ -16,7 +16,7 @@ const server = http.createServer(app)
 // Create a Socket.IO instance by passing the HTTP server
 const io = socketIO(server,{
     cors:{
-        origin:'http://localhost:3001',
+        origin:"*",
         methods:['GET' , 'POST'],
         credentials:true
     }
@@ -89,7 +89,7 @@ configureDB()
 // multer storage
 const storage = multer.diskStorage({
     destination:(req ,file , cb)=>{
-        if(file.fieldname=='profilePhoto' && file.mimetype.startsWith('image')){
+        if(file.fieldname=='image' && file.mimetype.startsWith('image')){
             cb(null,'./app/files/profileImages')
         }
         else if(file.mimetype.startsWith('video')){
@@ -115,9 +115,9 @@ const upload = multer({storage:storage})
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
 app.post('/api/update/password' , userCtrl.update)
-
+app.get('/api/user/account' , authenticateUser , userCtrl.account)
 //api requests for profile
-app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),checkSchema(profileValidationSchema),profileCtrl.create)
+app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('image'),checkSchema(profileValidationSchema),profileCtrl.create)
 app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),profileCtrl.edit)
 app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profileCtrl.account)
 app.get('/api/profiles/all' , authenticateUser , authorizeUser(['admin']) ,profileCtrl.all )
@@ -147,6 +147,8 @@ app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), payment
 app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
     bidCtrl.newBid(io , req ,res)
 })
+app.get('/api/buyer/:id/bids' , authenticateUser , authorizeUser(['admin']) , bidCtrl.list)
+app.get('/api/product/:id/bids' , authenticateUser , authorizeUser(['seller' , 'buyer']) , bidCtrl.bidsOnProduct)
 
 
 // api requests for orders
