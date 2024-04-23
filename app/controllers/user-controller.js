@@ -4,6 +4,8 @@ const Wallet = require('../models/wallet-model')
 const bcryptjs = require('bcryptjs')
 const _ =require('lodash')
 const jwt = require('jsonwebtoken')
+const _ = require('lodash')
+
 const userCtrl = {}
 
 userCtrl.register = async(req , res)=>{
@@ -57,9 +59,23 @@ userCtrl.login = async(req ,res)=>{
         }
         // Generating the token for authenticated user
         const token = jwt.sign(tokenData , process.env.JWT_SECRETKEY , {expiresIn:'7d'} )
-        res.json({token:token})
+        const updatedUser = _.pick(user , ['_id' , 'username', 'role' , 'email' , 'phone'])
+        res.json({token:token , user:updatedUser})
     }
     catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+
+userCtrl.account = async(req , res)=>{
+    try{
+        const user = await User.findOne({_id:req.user.id}).select('-password')
+        if(!user){
+            res.status(404).json({error:'User Not Found'})
+        }
+        res.json(user)
+    }catch(err){
         console.log(err)
         res.status(500).json({error:'Internal Server Errors'})
     }

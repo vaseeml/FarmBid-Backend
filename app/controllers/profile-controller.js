@@ -10,8 +10,6 @@ profileCtrl.create=async(req,res)=>{
     }
     try{
         const {body,file}=req
-        console.log(file)
-        console.log(body)
         const profile=new Profile(body)
         profile.userId=req.user.id
         const user=await User.findOne({_id:req.user.id})
