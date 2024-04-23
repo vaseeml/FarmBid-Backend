@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator')
 const User = require('../models/user-model')
 const Wallet = require('../models/wallet-model')
 const bcryptjs = require('bcryptjs')
+const _ =require('lodash')
 const jwt = require('jsonwebtoken')
 const _ = require('lodash')
 
@@ -95,6 +96,37 @@ userCtrl.update = async(req ,res)=>{
         user.password = encryptedPass
         await user.save()
         res.json({message:'updated password successfully'})
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+userCtrl.isBlock=async(req,res)=>{
+    const id=req.params.id
+    const body = _.pick(req.body , ['isBlock'])
+    try{
+        const data=await User.findOneAndUpdate({_id:id},body,{new:true})
+        res.json(data)
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+userCtrl.UnBlock=async(req,res)=>{
+    const id=req.params.id
+    const body = _.pick(req.body , ['isBlock'])
+    try{
+        const data=await User.findOneAndUpdate({_id:id},body,{new:true})
+        res.json(data)
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+userCtrl.Blocked=async(req,res)=>{
+    try{
+        const data=await User.find({isBlock:true})
+        res.json(data)
     }catch(err){
         console.log(err)
         res.status(500).json({error:'Internal Server Errors'})

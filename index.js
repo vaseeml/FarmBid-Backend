@@ -106,21 +106,26 @@ const storage = multer.diskStorage({
 })
 
 // Serve static files from the 'file' directory
-// app.use('/app/files/videos', express.static(path.join(__dirname, 'app/files/vidoes')));
+app.use('/app/files/profileImages', express.static(path.join(__dirname, 'app/files/profileImages')));
 app.use('/app/files', express.static(path.join(__dirname, 'app/files')));
-app.use('/profileImages', express.static(path.join(__dirname, 'profileImages')));
+// app.use('/profileImages', express.static(path.join(__dirname, 'profileImages')));
 const upload = multer({storage:storage})
 
 //api requests for users
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
 app.post('/api/update/password' , userCtrl.update)
+
+app.put('/api/block/:id',authenticateUser,authorizeUser(['admin']),userCtrl.isBlock)
+app.put('/api/unblock/:id',authenticateUser,authorizeUser(['admin']),userCtrl.UnBlock)
+app.get('/api/seller/blocked',authenticateUser,authorizeUser(['admin']),userCtrl.Blocked)
 app.get('/api/user/account' , authenticateUser , userCtrl.account)
 //api requests for profile
 app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('image'),checkSchema(profileValidationSchema),profileCtrl.create)
-app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('profilePhoto'),profileCtrl.edit)
+app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('image'),profileCtrl.edit)
 app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profileCtrl.account)
 app.get('/api/profiles/all' , authenticateUser , authorizeUser(['admin']) ,profileCtrl.all )
+
 
 // api requests for product(vegetables)
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
@@ -132,6 +137,7 @@ app.get('/api/products/my' , authenticateUser , authorizeUser(['seller']), produ
 app.delete('/api/delete/:id' , authenticateUser, authorizeUser(['seller']) , productCtrl.destroy)
 app.put('/api/update/:id' , authenticateUser , authorizeUser(['seller']), upload.fields([{name:'productImg' , maxCount:3},{name:'productVideo', maxCount:1}]), checkSchema(productCreateSchema) , productCtrl.update)
 app.get('/api/products/upcoming' , authenticateUser , authorizeUser(['seller' , 'buyer']) , productCtrl.getUpcoming)
+app.get('/api/seller/products/:id' , authenticateUser , authorizeUser(['admin']) ,productCtrl.sellerProducts )
 //api requests for wallet
 
 app.put('/api/wallet/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )

@@ -146,4 +146,14 @@ productCtrl.getUpcoming = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Errors' })
     }
 }
+productCtrl.sellerProducts = async (req, res) => {
+    const id=req.params.id
+    try {
+        const product = await Product.find({ sellerId: id })
+        res.status(200).json(product)
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ error: 'Internal Server Errors' })
+    }
+}
 module.exports = productCtrl

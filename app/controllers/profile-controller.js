@@ -10,7 +10,6 @@ profileCtrl.create=async(req,res)=>{
     }
     try{
         const {body,file}=req
-        console.log(file)
         const profile=new Profile(body)
         profile.userId=req.user.id
         const user=await User.findOne({_id:req.user.id})
@@ -23,6 +22,7 @@ profileCtrl.create=async(req,res)=>{
         res.status(201).json(profile)
     }catch(err){
         res.status(500).json({error:'Internal Server Errors'})
+        console.log(err)
     }
 }
 profileCtrl.edit=async(req,res)=>{
@@ -39,8 +39,11 @@ profileCtrl.edit=async(req,res)=>{
         }
         const updated=_.pick(req.body,['image','name','address','description'])
         if(req.file){
-            updated.image=req.file.path || profile.image
+            updated.image=req.file.path
+        }else{
+            updated.image=profile.image
         }
+        
         if(updated.name?.trim().length==0){
             return res.status(400).json({error:'name is required'})
         }
