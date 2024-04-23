@@ -32,11 +32,11 @@ const createOrder=async(lastBid)=>{
                 bidder:lastBid.bidderId,
                 bidAmount:lastBid.amount
             })
-            const wallet = await Wallet.findOne({userId:ProductId?.sellerId})
+            const wallet = await Wallet.findOne({userId:lastBid.productId?.sellerId})
             if(!wallet){
                 res.status(404).json({error:'seller wallet is not found'})
             }
-            wallet.balance = lastBid.amount
+            wallet.balance += lastBid.amount
             await wallet.save()
             await order.save()
             console.log('Order created successfully:', order)

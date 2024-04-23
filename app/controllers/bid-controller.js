@@ -20,6 +20,9 @@ bidCtrl.newBid = async(io ,req ,res )=>{
             return res.status(403).json({error:'Bidding Closed For This Product'})
         }
         // creating new intance of bid
+        if(body.amount <= product.basePrice){
+            return res.status(400).json({error:'Bid price should be greater than base price of product'})
+        }
         const bid = new Bid(body)
         bid.bidderId = req.user.id
         bid.amount = Number(body.amount)
@@ -70,9 +73,19 @@ bidCtrl.newBid = async(io ,req ,res )=>{
     }
 }
 
+bidCtrl.bidsOnProduct = async(req, res)=>{
+    const id = req.params.id
+    try{
+        const bidsOnProduct = await Bid.find({productId:id}).populate('bidderId' , ['username' , 'role' , 'email' , 'phone'])
+        res.json(bidsOnProduct)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+
 bidCtrl.list = async(req ,res)=>{
     const id = req.params.id
-    console.log(id)
     try{
         const bids = await Bid.find({bidderId:id}).populate('bidderId' ,['username' , 'role' , 'email' , 'phone'] ).populate('productId')
         res.json(bids)
