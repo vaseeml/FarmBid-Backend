@@ -41,8 +41,11 @@ profileCtrl.edit=async(req,res)=>{
         }
         const updated=_.pick(req.body,['image','name','address','description'])
         if(req.file){
-            updated.image=req.file.path || profile.image
+            updated.image=req.file.path
+        }else{
+            updated.image=profile.image
         }
+        
         if(updated.name?.trim().length==0){
             return res.status(400).json({error:'name is required'})
         }

@@ -38,7 +38,7 @@ productCtrl.getLive = async (req, res) => {
         }
         const currentTime = new Date()
         if (role == 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } }).populate('sellerId', ['name', 'phone', 'email'])
+            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } , biddingStatus:'open'}).populate('sellerId', ['name', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
