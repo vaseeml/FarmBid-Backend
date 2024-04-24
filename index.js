@@ -159,6 +159,7 @@ app.get('/api/product/:id/bids' , authenticateUser , authorizeUser(['seller' , '
 
 // api requests for orders
 app.get('/api/orders',authenticateUser,authorizeUser(['seller','buyer']), orderCtrl.list)
+app.get('/api/order/:id/product' , authenticateUser , authorizeUser(['seller']) , orderCtrl.buyerInfo)
 
 //api requests for otp
 app.post('/api/send-otp',otpCtrl.create)

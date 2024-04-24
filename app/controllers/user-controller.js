@@ -4,7 +4,6 @@ const Wallet = require('../models/wallet-model')
 const bcryptjs = require('bcryptjs')
 const _ =require('lodash')
 const jwt = require('jsonwebtoken')
-const _ = require('lodash')
 
 const userCtrl = {}
 
@@ -72,7 +71,7 @@ userCtrl.account = async(req , res)=>{
     try{
         const user = await User.findOne({_id:req.user.id}).select('-password')
         if(!user){
-            res.status(404).json({error:'User Not Found'})
+           return res.status(404).json({error:'User Not Found'})
         }
         res.json(user)
     }catch(err){
