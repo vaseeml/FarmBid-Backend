@@ -4,7 +4,6 @@ const Wallet = require('../models/wallet-model')
 const bcryptjs = require('bcryptjs')
 const _ =require('lodash')
 const jwt = require('jsonwebtoken')
-const _ = require('lodash')
 
 const userCtrl = {}
 
