@@ -23,6 +23,17 @@ orderCtrl.list=async(req,res)=>{
         res.status(500).json({error:'Internal Server Errors'})
     }
 }
+
+orderCtrl.buyerInfo = async(req, res)=>{
+    const id = req.params.id
+    try{
+        const order = await Order.findOne({product:id}).populate('bidder' , ['username' , 'phone' , 'email'])
+        res.json(order)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
 const createOrder=async(lastBid)=>{
     try{
         const productOrder = await Order.findOne({product:lastBid.productId?._id})
