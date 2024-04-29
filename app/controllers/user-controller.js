@@ -40,11 +40,11 @@ userCtrl.login = async(req ,res)=>{
     try{
         const user = await User.findOne({$or:[{email:body.loginId}, {phone:body.loginId}]})
         if(!user){
-            return res.status(404).json('Invalid Email/Password')
+            return res.status(404).json({errors: [{path:'loginId',msg: 'Invalid email or password'}]})
         }
         const checkPassword = await bcryptjs.compare(body.password, user.password)
         if(!checkPassword){
-           return res.status(401).json('Invalid Email/Password')
+            return res.status(404).json({errors: [{path:'password',msg: 'Invalid email or password'}]})
         }
         // checking the wallet of user 
         const userWallet = await Wallet.findOne({userId:user._id})
