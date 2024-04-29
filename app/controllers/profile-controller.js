@@ -45,13 +45,13 @@ profileCtrl.edit=async(req,res)=>{
         }
         
         if(updated.name?.trim().length==0){
-            return res.status(400).json({error:'name is required'})
+            return res.status(400).json({errors: [{path:'name',msg: 'Name is required'}]})
         }
         if(updated.address?.trim().length==0){
-            return res.status(400).json({error:'address is required'})
+            return res.status(400).json({errors: [{path:'address',msg: 'Address is required'}]})
         }
         if(updated.description?.trim().length==0){
-            return res.status(400).json({error:'description is required'})
+            return res.status(400).json({errors: [{path:'description',msg: 'Description is required'}]})
         }
         Object.assign(profile,updated)
         const profile1=await Profile.findOneAndUpdate({_id:id,userId:userId},profile,{new:true})

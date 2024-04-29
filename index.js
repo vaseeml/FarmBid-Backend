@@ -92,7 +92,7 @@ const storage = multer.diskStorage({
         if(file.fieldname=='image' && file.mimetype.startsWith('image')){
             cb(null,'./app/files/profileImages')
         }
-        else if(file.mimetype.startsWith('video')){
+        if(file.mimetype.startsWith('video')){
             cb(null , './app/files/videos')
         }else if(file.mimetype.startsWith('image')){
             cb(null , './app/files/images')
@@ -131,6 +131,8 @@ app.get('/api/profiles/all' , authenticateUser , authorizeUser(['admin']) ,profi
 // api requests for product(vegetables)
 app.post('/api/create/product' , authenticateUser , authorizeUser(['seller']),upload.fields([{name:'productImg' ,maxCount:3 }, {name: 'productVideo', maxCount:1}]) , checkSchema(productCreateSchema) ,  productCtrl.create)
 app.get('/api/products' , productCtrl.list) // common request for all before loggedIn
+app.get('/api/getcity', productCtrl.getcity) 
+app.get('/api/hi' , (req ,res)=>{ console.log(req.body)})
 app.get('/api/products/live',authenticateUser,authorizeUser(['seller','buyer']),productCtrl.getLive)
 app.get('/api/products/completed',authenticateUser,authorizeUser(['seller','buyer']),productCtrl.getCompleted)
 app.get('/api/list/products' , authenticateUser , authorizeUser(['buyer']) , productCtrl.list) // api for buyer to see all the vegetables listing
