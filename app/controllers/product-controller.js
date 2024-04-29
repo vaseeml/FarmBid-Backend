@@ -9,9 +9,12 @@ productCtrl.create = async (req, res) => {
     }
     try {
         const { body, files } = req
+        // console.log(body,files)
         const product = new Product(body)
         product.sellerId = req.user.id
-        product.productImg = files.productImg[0].path
+        product.productImg = files.productImg.map((ele)=>{
+            return ele.path
+        })
         product.productVideo = files.productVideo[0].path
         product.biddingStart = new Date(body.biddingStart)
         await product.save()
@@ -83,6 +86,19 @@ productCtrl.myVeg = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Errors' })
     }
 }
+
+productCtrl.getcity = async (req, res) => {
+    const body=req.body
+    console.log(body)
+    try {
+        const getcity = await Product.schema.path('cities').enumValues
+        res.status(200).json(getcity)
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ error: 'Internal Server Errors' })
+    }
+}
+
 productCtrl.destroy = async (req, res) => {
     const id = req.params.id
     console.log(id)
@@ -107,7 +123,9 @@ productCtrl.update = async (req, res) => {
     let updateProduct = { ...body }                        // spreading the body object to get all the existing fields
  
     if (files.productImg) {
-        updateProduct.productImg = files.productImg[0].path // assigning the path to product image
+        updateProduct.productImg =files.productImg.map((ele)=>{
+            return ele.path
+        }) // assigning the path to product image
     }
     else if (files.productVideo) {
         updateProduct.productVideo = files.productVideo[0].path // assigning the path to product video

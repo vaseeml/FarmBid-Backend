@@ -67,6 +67,14 @@ const productCreateSchema = {
         notEmpty:{
             errorMessage:'address cannot be empty'
         }
+    },
+    cities:{
+        exists:{
+            errorMessage:'cities is required'
+        },
+        notEmpty:{
+            errorMessage:'cities cannot be empty'
+        }
     }
 }
 
