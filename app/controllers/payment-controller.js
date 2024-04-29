@@ -80,4 +80,14 @@ paymentsCtrl.failedUpdate = async (req, res) => {
     }
 }
 
+paymentsCtrl.transactionHistory = async(req , res)=>{
+    const id = req.params.id
+    try{
+        const transactionHistory = await Payment.find({walletId:id})
+        res.json(transactionHistory)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
 module.exports = paymentsCtrl

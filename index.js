@@ -120,6 +120,7 @@ app.put('/api/block/:id',authenticateUser,authorizeUser(['admin']),userCtrl.isBl
 app.put('/api/unblock/:id',authenticateUser,authorizeUser(['admin']),userCtrl.UnBlock)
 app.get('/api/seller/blocked',authenticateUser,authorizeUser(['admin']),userCtrl.Blocked)
 app.get('/api/user/account' , authenticateUser , userCtrl.account)
+app.get('/api/users/all' , authenticateUser , authorizeUser(['admin']) , userCtrl.all)
 //api requests for profile
 app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),upload.single('image'),checkSchema(profileValidationSchema),profileCtrl.create)
 app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('image'),profileCtrl.edit)
@@ -143,11 +144,11 @@ app.get('/api/seller/products/:id' , authenticateUser , authorizeUser(['admin'])
 app.put('/api/wallet/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
 app.get('/api/wallet' , authenticateUser , authorizeUser(['buyer' , 'seller']),walletCtrl.show )
 
-
 //api requests for payment
 app.post('/api/create-checkout-session' ,authenticateUser , authorizeUser(['buyer']),checkSchema(paymentsValidationSchema), paymentsCtrl.pay)
 app.put('/api/success-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.successUpdate)
 app.put('/api/failed-update/:id' ,checkSchema(paymentsValidationSchema), paymentsCtrl.failedUpdate)
+app.get('/api/wallet-topup/:id/transactions' , authenticateUser , authorizeUser(['buyer']) , paymentsCtrl.transactionHistory)
 
 // api requests for bids
 app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=>{
@@ -155,7 +156,8 @@ app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=
 })
 app.get('/api/buyer/:id/bids' , authenticateUser , authorizeUser(['admin']) , bidCtrl.list)
 app.get('/api/product/:id/bids' , authenticateUser , authorizeUser(['seller' , 'buyer']) , bidCtrl.bidsOnProduct)
-
+app.get('/api/bids/all' , authenticateUser , authorizeUser('admin') , bidCtrl.all)
+app.get('/api/bids/on' , authenticateUser , authorizeUser(['admin']) , bidCtrl.chartBids)
 
 // api requests for orders
 app.get('/api/orders',authenticateUser,authorizeUser(['seller','buyer']), orderCtrl.list)

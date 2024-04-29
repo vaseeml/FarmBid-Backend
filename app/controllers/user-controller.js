@@ -7,6 +7,16 @@ const jwt = require('jsonwebtoken')
 
 const userCtrl = {}
 
+userCtrl.all = async(req ,res)=>{
+    try{
+        const users = await User.find()
+        res.json(users)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+
 userCtrl.register = async(req , res)=>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){

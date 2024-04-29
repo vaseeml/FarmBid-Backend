@@ -31,18 +31,24 @@ productCtrl.list = async (req, res) => {
     }
 }
 productCtrl.getLive = async (req, res) => {
+    const role = req.query.role
+    const search = req.query.search || ''
+    const sortBy = req.query.sortBy || 'productName'
+    const order = req.query.order || 1
+    const sortQuery = {}
+    sortQuery[sortBy] = order == 'asc'? 1 : -1
     try {
-        const role = req.query.role
         if (!role) {
             return res.status(400).json({ error: 'Role is required' })
         }
         const currentTime = new Date()
         if (role == 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } , biddingStatus:'open' }).populate('sellerId', ['username', 'phone', 'email'])
+            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } , biddingStatus:'open', productName: { $regex:search , $options:'i'} }).sort(sortQuery).populate('sellerId', ['username', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
-            const products = await Product.find({ biddingStart: { $lte: currentTime } })
+            const products = await Product.find({ biddingStart: { $lte: currentTime } , productName:{$regex:search , $options:'i'}})
+            .sort(sortQuery).populate('sellerId' , ['username' , 'phone' , 'email'])
             res.json(products)
         }
     } catch (err) {
@@ -51,22 +57,30 @@ productCtrl.getLive = async (req, res) => {
     }
 }
 productCtrl.getCompleted = async (req, res) => {
+    const role = req.query.role
+    const search = req.query.search || ''
+    const sortBy = req.query.sortBy || 'productName'
+    const order = req.query.order || 1
+    const sortQuery = {}
+    sortQuery[sortBy] = order == 'asc'? 1 : -1
     try {
-        const role = req.query.role
         if (!role) {
             return res.status(400).json({ error: 'Role is required' })
         }
         const currentTime = new Date()
         if (role == 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingEnd: { $lte: currentTime }, biddingStatus: 'closed' }).populate('sellerId', ['name', 'phone', 'email'])
+            const products = await Product.find({ sellerId: req.user.id, biddingEnd: { $lte: currentTime }, biddingStatus: 'closed' , productName:{ $regex:search , $options:'i'}})
+            .sort(sortQuery)
+            .populate('sellerId', ['name', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
+            console.log('bidder' , req.user.id)
             const bids = await Bid.find({ bidderId: req.user.id, winner: true })
             const productIds = bids.map((ele) => {
                 return ele.productId
             })
-            const products = await Product.find({ _id: { $in: productIds } })
+            const products = await Product.find({ _id: { $in: productIds } , productName:{ $regex:search , $options:'i'}}).sort(sortQuery).populate('sellerId' , ['username' , 'phone', 'email'])
             res.json(products)
         }
     } catch (err) {
@@ -128,17 +142,26 @@ productCtrl.update = async (req, res) => {
 }
 productCtrl.getUpcoming = async (req, res) => {
     const role = req.query.role
+    const search = req.query.search || ''
+    const sortBy = req.query.sortBy || 'productName'
+    const order = req.query.order || 1
+    const sortQuery = {}
+    sortQuery[sortBy] = order == 'asc'? 1 : -1
     if (!role) {
         return res.status(400).json({ error: 'Role is required' })
     }
     const currentTime = new Date()
     try {
         if (role === 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $gt: currentTime } }).populate('sellerId', ['name', 'phone', 'email'])
+            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $gt: currentTime } , productName:{$regex:search , $options:'i'}})
+            .sort(sortQuery)
+            .populate('sellerId', ['username', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
-            const products = await Product.find({ biddingStart: { $gt: currentTime } })
+            const products = await Product.find({ biddingStart: { $gt: currentTime } , productName:{ $regex:search , $options:'i'}})
+                .sort(sortQuery)
+                .populate('sellerId' , ['username' , 'phone', 'email'])
             res.json(products)
         }
     } catch (err) {

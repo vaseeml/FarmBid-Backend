@@ -40,7 +40,7 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         // updating the previous bid status 
         const updateStatus = await Bid.findOne({productId:body.productId ,status:'Active'})
         // checking previous bid amount with new bid amount
-        if(updateStatus?.amount > Number(body.amount)){
+        if(updateStatus?.amount >= Number(body.amount)){
             return res.status(400).json({error:'Invalid Bid Amount/Previous Bid Amount'})
         }
         if(updateStatus){  
@@ -65,7 +65,8 @@ bidCtrl.newBid = async(io ,req ,res )=>{
             product.biddingEnd = currentTime
             await product.save()
         }
-        io.to(body.productId).emit('newBid',bid)
+        const populatedBid = await Bid.findById(bid._id).populate('bidderId' , ['username', 'email', 'phone', 'role'])
+        io.to(body.productId).emit('newBid',populatedBid)
         res.status(201).json(bid)
     } catch(err){
         console.log(err)
@@ -77,6 +78,7 @@ bidCtrl.bidsOnProduct = async(req, res)=>{
     const id = req.params.id
     try{
         const bidsOnProduct = await Bid.find({productId:id}).populate('bidderId' , ['username' , 'role' , 'email' , 'phone'])
+        console.log('seller' , bidsOnProduct)
         res.json(bidsOnProduct)
     } catch(err){
         console.log(err)
@@ -84,10 +86,32 @@ bidCtrl.bidsOnProduct = async(req, res)=>{
     }
 }
 
+bidCtrl.chartBids = async (req , res)=>{
+    const search = req.query.search || ''
+    try{
+        const products = await Product.find({productName:{$regex:search , $options:'i'}})
+        const productIds = products.map(product => product._id)
+        const bids = await Bid.find({productId:{ $in: productIds }})
+        res.json(bids)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Error'})
+    }
+}
+
 bidCtrl.list = async(req ,res)=>{
     const id = req.params.id
     try{
         const bids = await Bid.find({bidderId:id}).populate('bidderId' ,['username' , 'role' , 'email' , 'phone'] ).populate('productId')
+        res.json(bids)
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+bidCtrl.all = async(req ,res)=>{
+    try{
+        const bids = await Bid.find().populate('productId')
         res.json(bids)
     } catch(err){
         console.log(err)

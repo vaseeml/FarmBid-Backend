@@ -22,6 +22,10 @@ cartCtrl.create = async(req ,res)=>{
     }
     try{
         const {body} = req
+        const productInCart = await Cart.findOne({product:body.product})
+        if(productInCart){
+            return res.status(400).json({error:'Product Is Already In Cart!'})
+        }
         const cart = new Cart(body)
         cart.user = req.user.id
         await cart.save()
@@ -72,7 +76,7 @@ const sendMail = (user , product)=>{
             pass:process.env.Pass
         }
     })
-    const pageUrl = `http://localhost:3000/product/${product._id}/bid`
+    const pageUrl = `http://localhost:3001/live/${product._id}/bid`
     const mailOptions = {
         from:process.env.Email,
         to:user?.email,
