@@ -9,6 +9,6 @@ const profileSchema=new Schema({
     address:String,
     phone:String,
     description:String
-})
+},{timestamps:true})
 const Profile=model('Profile',profileSchema)
 module.exports=Profile
