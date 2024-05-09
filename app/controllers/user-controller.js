@@ -4,7 +4,9 @@ const Wallet = require('../models/wallet-model')
 const bcryptjs = require('bcryptjs')
 const _ =require('lodash')
 const jwt = require('jsonwebtoken')
-
+const { OAuth2Client } = require('google-auth-library')
+const googleClientId = process.env.ClientId
+const client = new OAuth2Client(googleClientId)
 const userCtrl = {}
 
 userCtrl.all = async(req ,res)=>{
@@ -17,6 +19,33 @@ userCtrl.all = async(req ,res)=>{
     }
 }
 
+userCtrl.checkEmail = async(req ,res)=>{
+    const body = req.body
+    try{
+        const user = await User.findOne({email:body.email})
+        if(!user){
+            return res.status(200).json({exists:false})
+        }
+        res.status(200).json({exists:true})
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+
+userCtrl.checkPhone = async(req , res)=>{
+    const body = req.body
+    try{
+        const user = await User.findOne({phone:body.phone})
+        if(!user){
+            return res.status(200).json({exists:false})
+        }
+        res.status(200).json({exists:true})
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
 userCtrl.register = async(req , res)=>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){
@@ -51,6 +80,9 @@ userCtrl.login = async(req ,res)=>{
         const user = await User.findOne({$or:[{email:body.loginId}, {phone:body.loginId}]})
         if(!user){
             return res.status(404).json({errors: [{path:'loginId',msg: 'Invalid email or password'}]})
+        }
+        if(user.isBlock){
+            return res.status(400).json({errors:[{path:'blocked',msg: 'You Have Been Blocked By Admin'}]})
         }
         const checkPassword = await bcryptjs.compare(body.password, user.password)
         if(!checkPassword){
@@ -141,4 +173,36 @@ userCtrl.Blocked=async(req,res)=>{
         res.status(500).json({error:'Internal Server Errors'})
     }
 }
+
+userCtrl.googleLogin = async(req ,res)=>{
+    const body = req.body
+    console.log(body)
+    try{
+        const ticket = await client.verifyIdToken({
+            idToken:body.token,
+            audience: googleClientId,
+        })
+
+        const payload = ticket.getPayload()
+        const userId = payload['sub']
+        const userEmail = payload['email']
+        console.log('google data' , payload)
+        const user = await User.findOne({email:userEmail})
+        if(!user){
+            return res.status(400).json({error:'User not found'})
+        }
+        const tokenData = {
+            id:user._id,
+            role:user.role
+        }
+        // Generating the token for authenticated user
+        const token = jwt.sign(tokenData , process.env.JWT_SECRETKEY , {expiresIn:'7d'} )
+        const updatedUser = _.pick(user , ['_id' , 'username', 'role' , 'email' , 'phone'])
+        res.json({token:token , user:updatedUser})
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+}
+
 module.exports = userCtrl

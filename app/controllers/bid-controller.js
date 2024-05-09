@@ -59,14 +59,16 @@ bidCtrl.newBid = async(io ,req ,res )=>{
         await newBidderWallet.save()
         //saving new bidder record
         await bid.save()
-        if(product && !product.biddingEnd){
-            const currentTime = new Date()
-            currentTime.setMinutes(currentTime.getMinutes() + 10)
-            product.biddingEnd = currentTime
-            await product.save()
-        }
+        // if(product && !product.biddingEnd){
+        //     const currentTime = new Date()
+        //     currentTime.setMinutes(currentTime.getMinutes() + 10)
+        //     product.biddingEnd = currentTime
+        //     await product.save()
+        // }
         const populatedBid = await Bid.findById(bid._id).populate('bidderId' , ['username', 'email', 'phone', 'role'])
         io.to(body.productId).emit('newBid',populatedBid)
+        const idPrev = (updateStatus?.bidderId)?.toString()
+        io.to(idPrev).emit('updateWallet' , {amount:updateStatus?.amount})
         res.status(201).json(bid)
     } catch(err){
         console.log(err)
@@ -78,7 +80,6 @@ bidCtrl.bidsOnProduct = async(req, res)=>{
     const id = req.params.id
     try{
         const bidsOnProduct = await Bid.find({productId:id}).populate('bidderId' , ['username' , 'role' , 'email' , 'phone'])
-        console.log('seller' , bidsOnProduct)
         res.json(bidsOnProduct)
     } catch(err){
         console.log(err)
@@ -123,7 +124,7 @@ const checkBiddingStatus = async()=>{
     try{
         const currentTime = new Date()
         const products = await Product.find({biddingEnd:{$lte:currentTime} ,biddingStatus:'open' })
-        console.log(products)
+        // console.log(products)
         for(const product of products){
            const lastBid = await Bid.findOne({productId:product._id}).populate('productId', ['sellerId']).sort({createdAt:-1}).exec()
            if(lastBid){
@@ -134,7 +135,7 @@ const checkBiddingStatus = async()=>{
                 await lastBid.save()
                 await createOrder(lastBid)
            }else{
-            console.log('No Product Is Found For ' , product._id)
+            console.log('No Bids Is Found For ' , product._id)
            }
         }
     }catch(err){

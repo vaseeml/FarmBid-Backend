@@ -2,6 +2,7 @@ const Bid=require('../models/bid-model')
 const Order=require('../models/order-model')
 const Product=require('../models/product-model')
 const Wallet = require('../models/wallet-model')
+const handleSocketUpdates = require('../../index')
 const orderCtrl={}
 orderCtrl.list=async(req,res)=>{
     try{
@@ -50,6 +51,9 @@ const createOrder=async(lastBid)=>{
             wallet.balance += lastBid.amount
             await wallet.save()
             await order.save()
+            const idPrev = (lastBid?.bidderId)?.toString()
+            handleSocketUpdates(idPrev , {productId:lastBid.productsId?._id , bidAmount:lastBid.amount})
+            // io.to(idPrev).emit('bidWon' , {productId:lastBid.productId?._id , bidAmount:lastBid.amount})
             console.log('Order created successfully:', order)
         }
         console.log('order already placed')

@@ -6,7 +6,7 @@ const orderSchema=new Schema({
     },
     bidder:{
         type:Schema.Types.ObjectId,
-        ref:'Bid'
+        ref:'User'
     },
     bidAmount:Number
 }, {timestamps:true})

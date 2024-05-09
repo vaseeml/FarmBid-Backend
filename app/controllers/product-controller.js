@@ -17,6 +17,7 @@ productCtrl.create = async (req, res) => {
         })
         product.productVideo = files.productVideo[0].path
         product.biddingStart = new Date(body.biddingStart)
+        product.biddingEnd = new Date(body.biddingEnd)
         await product.save()
         res.status(201).json(product)
     } catch (err) {
@@ -38,6 +39,10 @@ productCtrl.getLive = async (req, res) => {
     const search = req.query.search || ''
     const sortBy = req.query.sortBy || 'productName'
     const order = req.query.order || 1
+    let page = req.query.page || 1
+    let limit = req.query.limit || 8
+    page = parseInt(page)
+    limit = parseInt(limit)
     const sortQuery = {}
     sortQuery[sortBy] = order == 'asc'? 1 : -1
     try {
@@ -46,12 +51,19 @@ productCtrl.getLive = async (req, res) => {
         }
         const currentTime = new Date()
         if (role == 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } , biddingStatus:'open', productName: { $regex:search , $options:'i'} }).sort(sortQuery).populate('sellerId', ['username', 'phone', 'email'])
+            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $lte: currentTime } , biddingStatus:'open', productName: { $regex:search , $options:'i'} })
+            .sort(sortQuery)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate('sellerId', ['username', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
-            const products = await Product.find({ biddingStart: { $lte: currentTime } , productName:{$regex:search , $options:'i'}})
-            .sort(sortQuery).populate('sellerId' , ['username' , 'phone' , 'email'])
+            const products = await Product.find({ biddingStart: { $lte: currentTime } , productName:{$regex:search , $options:'i'} })
+            .sort(sortQuery)
+            .skip((page - 1)* limit)
+            .limit(limit)
+            .populate('sellerId' , ['username' , 'phone' , 'email'])
             res.json(products)
         }
     } catch (err) {
@@ -64,6 +76,10 @@ productCtrl.getCompleted = async (req, res) => {
     const search = req.query.search || ''
     const sortBy = req.query.sortBy || 'productName'
     const order = req.query.order || 1
+    let page = req.query.page || 1
+    let limit = req.query.limit || 8
+    page = parseInt(page)
+    limit = parseInt(limit)
     const sortQuery = {}
     sortQuery[sortBy] = order == 'asc'? 1 : -1
     try {
@@ -74,16 +90,22 @@ productCtrl.getCompleted = async (req, res) => {
         if (role == 'seller') {
             const products = await Product.find({ sellerId: req.user.id, biddingEnd: { $lte: currentTime }, biddingStatus: 'closed' , productName:{ $regex:search , $options:'i'}})
             .sort(sortQuery)
+            .skip((page - 1)* limit)
+            .limit(limit)
             .populate('sellerId', ['name', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
-            console.log('bidder' , req.user.id)
+            // console.log('bidder' , req.user.id)
             const bids = await Bid.find({ bidderId: req.user.id, winner: true })
             const productIds = bids.map((ele) => {
                 return ele.productId
             })
-            const products = await Product.find({ _id: { $in: productIds } , productName:{ $regex:search , $options:'i'}}).sort(sortQuery).populate('sellerId' , ['username' , 'phone', 'email'])
+            const products = await Product.find({ _id: { $in: productIds } , productName:{ $regex:search , $options:'i'}})
+            .sort(sortQuery)
+            .skip((page - 1)* limit)
+            .limit(limit)
+            .populate('sellerId' , ['username' , 'phone', 'email'])
             res.json(products)
         }
     } catch (err) {
@@ -163,6 +185,10 @@ productCtrl.getUpcoming = async (req, res) => {
     const search = req.query.search || ''
     const sortBy = req.query.sortBy || 'productName'
     const order = req.query.order || 1
+    let page = req.query.page || 1
+    let limit = req.query.limit || 8
+    page = parseInt(page)
+    limit = parseInt(limit)
     const sortQuery = {}
     sortQuery[sortBy] = order == 'asc'? 1 : -1
     if (!role) {
@@ -173,12 +199,16 @@ productCtrl.getUpcoming = async (req, res) => {
         if (role === 'seller') {
             const products = await Product.find({ sellerId: req.user.id, biddingStart: { $gt: currentTime } , productName:{$regex:search , $options:'i'}})
             .sort(sortQuery)
+            .skip((page - 1)* limit)
+            .limit(limit)
             .populate('sellerId', ['username', 'phone', 'email'])
             res.json(products)
         }
         if (role == 'buyer') {
             const products = await Product.find({ biddingStart: { $gt: currentTime } , productName:{ $regex:search , $options:'i'}})
                 .sort(sortQuery)
+                .skip((page - 1)* limit)
+                .limit(limit)
                 .populate('sellerId' , ['username' , 'phone', 'email'])
             res.json(products)
         }

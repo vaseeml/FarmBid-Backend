@@ -48,7 +48,7 @@ const productSchema = new Schema({
         ]
     },
     biddingStart: { type: Date, required: true },
-    biddingEnd: Date ,
+    biddingEnd: { type: Date, required: true },
     biddingStatus: { type: String, enum: ['open', 'closed'], default: 'open' }
 },{timestamps:true})
 

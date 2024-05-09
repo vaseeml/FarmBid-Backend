@@ -9,6 +9,11 @@ const path = require('path')
 const configureDB = require('./config/db')
 app.use(cors())
 app.use(express.json())
+app.use((req, res, next) => {
+    res.set('Cross-Origin-Opener-Policy', 'same-origin');
+    res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+    next();
+});
 const bidCtrl = require('./app/controllers/bid-controller')
 // Create an HTTP server using the Express app
 const server = http.createServer(app)
@@ -22,7 +27,6 @@ const io = socketIO(server,{
     }
 })
 
-
 // Handle Socket.IO connections
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
@@ -34,6 +38,11 @@ io.on('connection', (socket) => {
         socket.join(productId);
         console.log(`Client ${socket.id} joined room for product ${productId}`);
     });
+    // join the room for user 
+    socket.on('joinUsersRoom' , (userId)=>{
+        socket.join(userId)
+        console.log(`socket ${socket.id} joined the room ${userId}`)
+    })
     // Leave the product room when the client requests to leave
     socket.on('leaveProductRoom', (productId) => {
         // Leave the room associated with the product
@@ -67,7 +76,7 @@ const productCtrl = require('./app/controllers/product-controller')
 const walletCtrl = require('./app/controllers/wallet-controller')
 const profileCtrl = require('./app/controllers/profile-controller')
 const paymentsCtrl = require('./app/controllers/payment-controller')
-
+const reportCtrl = require('./app/controllers/report-controller')
 const {orderCtrl}=require('./app/controllers/order-controller')
 
 const cartCtrl = require('./app/controllers/cart-controller')
@@ -81,6 +90,7 @@ const productCreateSchema = require('./app/validations/productValidationSchema')
 const walletValidationSchema = require('./app/validations/walletValidationSchema')
 const profileValidationSchema = require('./app/validations/profileValidationSchema')
 const paymentsValidationSchema = require('./app/validations/paymentValidationSchema')
+const reportValidationSchema = require('./app/validations/reportValidationSchema')
 const otpCtrl = require('./app/controllers/otp-controller')
 const cartValidationSchema = require('./app/validations/cartValidationSchema')
 
@@ -91,6 +101,8 @@ const storage = multer.diskStorage({
     destination:(req ,file , cb)=>{
         if(file.fieldname=='image' && file.mimetype.startsWith('image')){
             cb(null,'./app/files/profileImages')
+        }if(file.fieldname == 'productImage' && file.mimetype.startsWith('image')){
+            cb(null , './app/files/productImages')
         }
         if(file.mimetype.startsWith('video')){
             cb(null , './app/files/videos')
@@ -105,6 +117,10 @@ const storage = multer.diskStorage({
     }
 })
 
+const handleSocketUpdates = (idPrev , data)=>{
+    io.to(idPrev).emit('bidWon' , {productId:data.productId , bidAmount:data.productId})
+}
+module.exports = handleSocketUpdates
 // Serve static files from the 'file' directory
 app.use('/app/files/profileImages', express.static(path.join(__dirname, 'app/files/profileImages')));
 app.use('/app/files', express.static(path.join(__dirname, 'app/files')));
@@ -115,6 +131,8 @@ const upload = multer({storage:storage})
 app.post('/api/register' ,checkSchema(userRegisterSchema),userCtrl.register )
 app.post('/api/login' , checkSchema(userLoginSchema),userCtrl.login)
 app.post('/api/update/password' , userCtrl.update)
+app.post('/api/check-email' , userCtrl.checkEmail)
+app.post('/api/check-phone' , userCtrl.checkPhone)
 
 app.put('/api/block/:id',authenticateUser,authorizeUser(['admin']),userCtrl.isBlock)
 app.put('/api/unblock/:id',authenticateUser,authorizeUser(['admin']),userCtrl.UnBlock)
@@ -126,6 +144,7 @@ app.post('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),uploa
 app.put('/api/profile/:id',authenticateUser,authorizeUser(['seller','buyer']),upload.single('image'),profileCtrl.edit)
 app.get('/api/profile',authenticateUser,authorizeUser(['seller','buyer']),profileCtrl.account)
 app.get('/api/profiles/all' , authenticateUser , authorizeUser(['admin']) ,profileCtrl.all )
+app.get('/api/get/profileImage/:id' , profileCtrl.getProfilePath)
 
 
 // api requests for product(vegetables)
@@ -145,6 +164,7 @@ app.get('/api/seller/products/:id' , authenticateUser , authorizeUser(['admin'])
 
 app.put('/api/wallet/credit' , authenticateUser , authorizeUser(['buyer']),checkSchema(walletValidationSchema) ,walletCtrl.update )
 app.get('/api/wallet' , authenticateUser , authorizeUser(['buyer' , 'seller']),walletCtrl.show )
+app.get('/api/wallet/transactions' , authenticateUser , authorizeUser(['buyer' , 'seller']) , walletCtrl.transactions)
 
 //api requests for payment
 app.post('/api/create-checkout-session' ,authenticateUser , authorizeUser(['buyer']),checkSchema(paymentsValidationSchema), paymentsCtrl.pay)
@@ -157,13 +177,13 @@ app.post('/api/bid' , authenticateUser , authorizeUser(['buyer']) , (req , res)=
     bidCtrl.newBid(io , req ,res)
 })
 app.get('/api/buyer/:id/bids' , authenticateUser , authorizeUser(['admin']) , bidCtrl.list)
-app.get('/api/product/:id/bids' , authenticateUser , authorizeUser(['seller' , 'buyer']) , bidCtrl.bidsOnProduct)
+app.get('/api/product/:id/bids' , authenticateUser , authorizeUser(['seller' , 'buyer' , 'admin']) , bidCtrl.bidsOnProduct)
 app.get('/api/bids/all' , authenticateUser , authorizeUser('admin') , bidCtrl.all)
 app.get('/api/bids/on' , authenticateUser , authorizeUser(['admin']) , bidCtrl.chartBids)
 
 // api requests for orders
 app.get('/api/orders',authenticateUser,authorizeUser(['seller','buyer']), orderCtrl.list)
-app.get('/api/order/:id/product' , authenticateUser , authorizeUser(['seller']) , orderCtrl.buyerInfo)
+app.get('/api/order/:id/product' , authenticateUser , authorizeUser(['seller' , 'buyer']) , orderCtrl.buyerInfo)
 
 //api requests for otp
 app.post('/api/send-otp',otpCtrl.create)
@@ -174,7 +194,17 @@ app.get('/api/cart' , authenticateUser , authorizeUser(['buyer']) , cartCtrl.lis
 app.post('/api/cart' , authenticateUser , authorizeUser(['buyer']) ,checkSchema(cartValidationSchema) , cartCtrl.create)
 app.delete('/api/cart/:id', authenticateUser , authorizeUser(['buyer']) , cartCtrl.destroy)
 
+// api for reporting
+app.post('/api/reports' , authenticateUser , authorizeUser(['buyer','admin']), upload.fields([{name:'productImage' , maxCount:3}]) ,checkSchema(reportValidationSchema) ,reportCtrl.create)
+app.get('/api/reports' , authenticateUser , authorizeUser(['admin']) , reportCtrl.list)
 
+// api for clientId
+app.get('/api/google-clientId' , (req ,res)=>{
+    res.json({clientId:process.env.ClientId})
+})
+
+// api for google user login
+app.post('/api/google/login' , userCtrl.googleLogin)
 server.listen(port , ()=>{
     console.log('server is running successfully on port ' , port)
 })

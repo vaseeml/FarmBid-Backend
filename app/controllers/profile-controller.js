@@ -82,4 +82,14 @@ profileCtrl.all = async(req ,res)=>{
         res.status(500).json({error:'Internal Server Errors'})
     }
 }
+profileCtrl.getProfilePath = async(req , res)=>{
+    const id = req.params.id
+    try{
+        const profile = await Profile.findOne({userId:id})
+        res.json({profileId:profile._id , path:profile.image , name:profile.name , address:profile.address , description:profile.description})
+    } catch(err){
+        console.log(err)
+        res.status(500).json({error:'Internal Server Errors'})
+    }
+} 
 module.exports=profileCtrl
