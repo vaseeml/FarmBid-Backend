@@ -59,7 +59,7 @@ productCtrl.getLive = async (req, res) => {
             res.json(products)
         }
         if (role == 'buyer') {
-            const products = await Product.find({ biddingStart: { $lte: currentTime } , productName:{$regex:search , $options:'i'} })
+            const products = await Product.find({ biddingStart: { $lte: currentTime } , biddingStatus:'open' , productName:{$regex:search , $options:'i'} })
             .sort(sortQuery)
             .skip((page - 1)* limit)
             .limit(limit)
@@ -197,7 +197,7 @@ productCtrl.getUpcoming = async (req, res) => {
     const currentTime = new Date()
     try {
         if (role === 'seller') {
-            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $gt: currentTime } , productName:{$regex:search , $options:'i'}})
+            const products = await Product.find({ sellerId: req.user.id, biddingStart: { $gt: currentTime }, biddingStatus:'open', productName:{$regex:search , $options:'i'}})
             .sort(sortQuery)
             .skip((page - 1)* limit)
             .limit(limit)
@@ -205,7 +205,7 @@ productCtrl.getUpcoming = async (req, res) => {
             res.json(products)
         }
         if (role == 'buyer') {
-            const products = await Product.find({ biddingStart: { $gt: currentTime } , productName:{ $regex:search , $options:'i'}})
+            const products = await Product.find({ biddingStart: { $gt: currentTime } , biddingStatus:'open' , productName:{ $regex:search , $options:'i'}})
                 .sort(sortQuery)
                 .skip((page - 1)* limit)
                 .limit(limit)
