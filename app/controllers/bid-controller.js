@@ -120,7 +120,6 @@ bidCtrl.all = async(req ,res)=>{
     }
 }
 const checkBiddingStatus = async()=>{
-    console.log('checking every minute')
     try{
         const currentTime = new Date()
         const products = await Product.find({biddingEnd:{$lte:currentTime} ,biddingStatus:'open' })
@@ -135,7 +134,7 @@ const checkBiddingStatus = async()=>{
                 await lastBid.save()
                 await createOrder(lastBid)
            }else{
-            console.log('No Bids Is Found For ' , product._id)
+            await Product.findOneAndUpdate({_id:product._id} , {$set:{biddingStatus:'closed'}})
            }
         }
     }catch(err){

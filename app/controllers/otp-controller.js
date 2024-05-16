@@ -48,9 +48,10 @@ otpCtrl.verify=async(req, res) => {
             return res.status(400).json({ success: false, message: 'OTP has expired' })
         }
             // Compare OTP entered by the user with the generated OTP
-            if (user.otp === otp) {
+            if (user.otp === Number(otp)) {
                 res.status(200).json({ success: true, message: 'OTP verification successful' })
             } else {
+                console.log(user.otp , otp)
                 res.status(400).json({ success: false, message: 'Incorrect OTP' })
             }
         
